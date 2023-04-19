@@ -1,0 +1,24 @@
+[
+  "sachets",
+  "tranches",
+  "tasses",
+  "tiges",
+  "gousses",
+  "verres",
+  "feuilles",
+  "barquettes",
+  "boites",
+  [
+    "grammes",
+    "kg",
+    "ml",
+    "cl",
+    "litre",
+    "litres",
+    "Litres",
+    "cuillère à soupe",
+    "cuillères à soupe",
+    "cuillères à café",
+    "pincées"
+  ]
+]

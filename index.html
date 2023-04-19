@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link href="dist/output.css" rel="stylesheet" type="text/css" />
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/png" href="assets/favicon.png" />
+    <link
+      href="https://fonts.googleapis.com/css?family=DM+Sans&display=swap"
+      rel="stylesheet"
+    />
+    <title>Les Petits Plats</title>
+  </head>
+  <body>
+    <header class="p-10 flex justify-center w-full">
+      <img
+        width="250px"
+        height="93px"
+        src="assets/logo.png"
+        alt="les-petits-plats-logo"
+      />
+    </header>
+    <main>
+      <div id="search"></div>
+      <div id="results"></div>
+    </main>
+    <script src="data/recipes.js"></script>
+    <script src="scripts/Model.js"></script>
+    <script src="scripts/views/RecipeCard.js"></script>
+    <script src="scripts/views/RecipesView.js"></script>
+    <script src="scripts/Controller.js"></script>
+    <script>
+      let controller = new Controller();
+      controller.displayIndex();
+    </script>
+  </body>
+</html>
