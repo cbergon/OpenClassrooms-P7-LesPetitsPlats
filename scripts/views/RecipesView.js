@@ -5,15 +5,19 @@ class RecipesView {
       "flex",
       "flex-wrap",
       "justify-center",
-      "gap-10"
+      "gap-10",
+      "p-10"
     );
   }
 
-  render(recipes) {
+  render(recipes, filters) {
     this.recipesContainer.innerHTML = "";
     recipes.forEach((recipe) => {
       const recipeCard = new RecipeCard(recipe);
       this.recipesContainer.appendChild(recipeCard.render());
     });
+
+    const search = new Search();
+    search.render(filters);
   }
 }

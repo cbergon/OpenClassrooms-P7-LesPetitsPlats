@@ -4,9 +4,9 @@ class Controller {
   }
 
   async displayIndex() {
-    this.model.init();
-    const recipes = this.model.getRecipes();
+    const filters = this.model.getFilters();
+    const recipes = this.model.getFilteredRecipes();
     const recipesView = new RecipesView();
-    recipesView.render(recipes);
+    recipesView.render(recipes, filters);
   }
 }

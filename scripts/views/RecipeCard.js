@@ -3,8 +3,6 @@ class RecipeCard {
     switch (unit) {
       case "grammes":
         return "g";
-      case "kg":
-        return "kg";
       case "ml":
         return "mL";
       case "cl":
@@ -17,29 +15,8 @@ class RecipeCard {
         return " c. à soupe";
       case "cuillères à café":
         return " c. à café";
-      case "pincée":
-      case "pincées":
-        return " pincée(s)";
-      case "sachets":
-        return "sachets";
-      case "tranches":
-        return "tranches";
-      case "tasses":
-        return "tasses";
-      case "tiges":
-        return "tiges";
-      case "gousses":
-        return "gousses";
-      case "verres":
-        return "verres";
-      case "feuilles":
-        return "feuilles";
-      case "barquettes":
-        return "barquettes";
-      case "boites":
-        return "boites";
       default:
-        return "";
+        return ` ${unit}`;
     }
   }
 
@@ -130,7 +107,7 @@ class RecipeCard {
 
   createIngredient(ingredient) {
     const ingredientElement = document.createElement("div");
-    ingredientElement.classList.add("flex", "items-center", "gap-2");
+    ingredientElement.classList.add("flex", "items-center");
 
     const ingredientName = document.createElement("span");
     ingredientName.classList.add("font-bold");
@@ -139,9 +116,12 @@ class RecipeCard {
 
     if (ingredient.quantity) {
       const ingredientQuantity = document.createElement("span");
-      ingredientQuantity.textContent = `: ${ingredient.quantity}${
-        this.parseUnit(ingredient.unit?.toLowerCase()) || ""
-      }`;
+      ingredientQuantity.textContent = `: ${ingredient.quantity}`;
+      if (ingredient.unit) {
+        ingredientQuantity.textContent += this.parseUnit(
+          ingredient.unit?.toLowerCase()
+        );
+      }
       ingredientElement.appendChild(ingredientQuantity);
     }
 
