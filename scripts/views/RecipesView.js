@@ -10,14 +10,14 @@ class RecipesView {
     );
   }
 
-  render(recipes, filters) {
+  render(recipes, availableFilters, filters) {
+    const search = new Search();
+    search.render(availableFilters, filters);
+
     this.recipesContainer.innerHTML = "";
     recipes.forEach((recipe) => {
       const recipeCard = new RecipeCard(recipe);
       this.recipesContainer.appendChild(recipeCard.render());
     });
-
-    const search = new Search();
-    search.render(filters);
   }
 }

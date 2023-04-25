@@ -3,7 +3,7 @@ class Model {
     this.recipes = [...recipes];
 
     // add a search filter for title, description and ingredients
-    // map this.recipes to get all distincts ingredients, appliances and tools
+    // map this.recipes to erase duplicates
 
     this.ingredients = [];
     this.appliances = [];
@@ -11,15 +11,35 @@ class Model {
 
     this.filters = {
       global: [],
-      ingredients: this.recipes.reduce(
-        (acc, recipe) => [
-          ...acc,
-          ...recipe.ingredients.map((ingredient) => ingredient.ingredient),
-        ],
-        []
-      ),
-      appliances: this.recipes.map((recipe) => recipe.appliance),
-      tools: this.recipes.map((recipe) => recipe.ustensils),
+      ingredients: [],
+      appliances: [],
+      tools: [],
+    };
+
+    this.availableFilters = {
+      ingredients: Array.from(
+        new Set(
+          this.recipes.reduce(
+            (acc, recipe) => [
+              ...acc,
+              ...recipe.ingredients.map((ingredient) =>
+                this.capitalise(ingredient.ingredient)
+              ),
+            ],
+            []
+          )
+        )
+      ).sort(),
+      appliances: Array.from(
+        new Set(this.recipes.map((recipe) => this.capitalise(recipe.appliance)))
+      ).sort(),
+      tools: Array.from(
+        new Set(
+          this.recipes.flatMap((recipe) =>
+            recipe.ustensils.map(this.capitalise)
+          )
+        )
+      ).sort(),
     };
   }
 
@@ -47,6 +67,10 @@ class Model {
     });
   }
 
+  getAvailableFilters() {
+    return this.availableFilters;
+  }
+
   getFilters() {
     return this.filters;
   }
@@ -58,5 +82,12 @@ class Model {
   removeFilter(type, value) {
     console.log(`removing ${value} from ${type}`);
     // this.filters[type] = this.filters[type].filter((item) => item !== value);
+  }
+
+  capitalise(phrase) {
+    console.log(phrase);
+    return `${phrase.substring(0, 1).toUpperCase()}${phrase
+      .substring(1)
+      .toLowerCase()}`;
   }
 }

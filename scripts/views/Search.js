@@ -1,10 +1,9 @@
 class Search {
   constructor() {
     this.searchContainer = document.querySelector("#search");
-    this.model = new Model();
   }
 
-  render(filters) {
+  render(availableFilters, filters) {
     this.searchContainer.classList.add(
       "flex",
       "flex-col",
@@ -58,21 +57,54 @@ class Search {
     // #region filters inputs
     const filterInputsWrapper = document.createElement("div");
     filterInputsWrapper.classList.add("flex", "gap-2", "items-center");
+
     const ingredientsInput = document.createElement("input");
-    ingredientsInput.list = model.ingredients;
+    ingredientsInput.setAttribute("list", "ingredients-filter");
+    const ingredientsDataList = this.genDataList(
+      "ingredients-filter",
+      availableFilters.ingredients
+    );
 
     const appliancesInput = document.createElement("input");
-    appliancesInput.list = model.appliances;
+    appliancesInput.setAttribute("list", "appliances-filter");
+    const appliancesDataList = this.genDataList(
+      "appliances-filter",
+      availableFilters.appliances
+    );
 
     const toolsInput = document.createElement("input");
-    toolsInput.list = model.tools;
+    toolsInput.setAttribute("list", "tools-filter");
+    const toolsDataList = this.genDataList(
+      "tools-filter",
+      availableFilters.tools
+    );
 
-    filterInputsWrapper.append(ingredientsInput, appliancesInput, toolsInput);
+    filterInputsWrapper.append(
+      ingredientsInput,
+      ingredientsDataList,
+      appliancesInput,
+      appliancesDataList,
+      toolsInput,
+      toolsDataList
+    );
     // #endregion
 
     this.searchContainer.appendChild(searchBarContainer);
     this.searchContainer.appendChild(filterTagsWrapper);
     this.searchContainer.appendChild(filterInputsWrapper);
+  }
+
+  genDataList(listId, options) {
+    const dataList = document.createElement("datalist");
+    dataList.setAttribute("id", listId);
+
+    const opts = options.map((ig) => {
+      const option = document.createElement("option");
+      option.setAttribute("value", ig);
+      return option;
+    });
+    dataList.append(...opts);
+    return dataList;
   }
 
   getColor(type) {
