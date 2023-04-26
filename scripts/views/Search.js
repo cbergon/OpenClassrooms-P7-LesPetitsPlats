@@ -1,9 +1,17 @@
 class Search {
   constructor() {
     this.searchContainer = document.querySelector("#search");
+    this.availableFilters = {};
+
+    this.translations = {
+      ingredients: "ingrédient",
+      appliances: "appareil",
+      tools: "ustensile",
+    };
   }
 
-  render(availableFilters, filters) {
+  init(availableFilters) {
+    this.availableFilters = availableFilters;
     this.searchContainer.classList.add(
       "flex",
       "flex-col",
@@ -17,94 +25,123 @@ class Search {
     searchBarContainer.classList.add("flex", "justify-center", "w-full");
 
     const searchInput = document.createElement("input");
-    searchInput.classList.add("w-max", "h-10", "px-4", "rounded", "w-full");
+    searchInput.classList.add("h-10", "px-4", "rounded", "w-full");
     searchInput.placeholder = "Rechercher une recette";
     searchBarContainer.appendChild(searchInput);
     // #endregion
 
-    // #region filters tags
-    const filterTagsWrapper = document.createElement("div");
-    filterTagsWrapper.classList.add("flex", "gap-2", "items-center", "p-2");
-
-    const filterTags = Object.keys(filters).reduce((acc, filterType) => {
-      const tags = filters[filterType].map((filter) => {
-        const tag = document.createElement("div");
-        const color = `bg-${this.getColor(filterType)}`;
-        tag.classList.add(
-          "flex",
-          "items-center",
-          "gap-2",
-          "px-4",
-          "py-2",
-          "rounded",
-          "text-white",
-          color
-        );
-        tag.textContent = filter;
-
-        const closeButton = document.createElement("button");
-        closeButton.onclick = () => this.model.removeFilter(filterType, filter);
-        closeButton.textContent = "X";
-
-        tag.appendChild(closeButton);
-        return tag;
-      });
-      return [...acc, ...tags];
-    }, []);
-    filterTagsWrapper.append(...filterTags);
+    // #region filter tags
+    this.filterTagsWrapper = document.createElement("div");
+    this.filterTagsWrapper.classList.add(
+      "flex",
+      "gap-2",
+      "items-center",
+      "p-2"
+    );
+    this.filterTagsWrapper.setAttribute("id", "tags-wrapper");
     // #endregion
 
     // #region filters inputs
     const filterInputsWrapper = document.createElement("div");
     filterInputsWrapper.classList.add("flex", "gap-2", "items-center");
 
-    const ingredientsInput = document.createElement("input");
-    ingredientsInput.setAttribute("list", "ingredients-filter");
-    const ingredientsDataList = this.genDataList(
-      "ingredients-filter",
-      availableFilters.ingredients
-    );
-
-    const appliancesInput = document.createElement("input");
-    appliancesInput.setAttribute("list", "appliances-filter");
-    const appliancesDataList = this.genDataList(
-      "appliances-filter",
-      availableFilters.appliances
-    );
-
-    const toolsInput = document.createElement("input");
-    toolsInput.setAttribute("list", "tools-filter");
-    const toolsDataList = this.genDataList(
-      "tools-filter",
-      availableFilters.tools
-    );
+    const ingredientsFilter = this.genFilter("ingredients");
+    const appliancesFilter = this.genFilter("appliances");
+    const toolsFilter = this.genFilter("tools");
 
     filterInputsWrapper.append(
-      ingredientsInput,
-      ingredientsDataList,
-      appliancesInput,
-      appliancesDataList,
-      toolsInput,
-      toolsDataList
+      ...ingredientsFilter,
+      ...appliancesFilter,
+      ...toolsFilter
     );
     // #endregion
 
     this.searchContainer.appendChild(searchBarContainer);
-    this.searchContainer.appendChild(filterTagsWrapper);
+    this.searchContainer.appendChild(this.filterTagsWrapper);
     this.searchContainer.appendChild(filterInputsWrapper);
   }
 
-  genDataList(listId, options) {
-    const dataList = document.createElement("datalist");
-    dataList.setAttribute("id", listId);
+  render(filters) {
+    // #region filters tags
+    const filterTags = Object.keys(filters).reduce((acc, filterType) => {
+      const tags = filters[filterType].map((filter) =>
+        this.genTag(filterType, filter)
+      );
+      return [...acc, ...tags];
+    }, []);
+    this.filterTagsWrapper.innerHTML = "";
+    this.filterTagsWrapper.append(...filterTags);
+    // #endregion
+  }
 
-    const opts = options.map((ig) => {
+  genTag(type, filter) {
+    const tag = document.createElement("div");
+    const color = `bg-${this.getColor(type)}`;
+    tag.classList.add(
+      "flex",
+      "items-center",
+      "gap-2",
+      "px-4",
+      "py-2",
+      "rounded",
+      "text-white",
+      color
+    );
+    tag.textContent = filter;
+
+    const closeButton = document.createElement("button");
+    closeButton.onclick = () =>
+      document.dispatchEvent(
+        new CustomEvent("filter-remove", {
+          detail: {
+            filterType: type,
+            filterValue: filter,
+          },
+        })
+      );
+    closeButton.textContent = "X";
+
+    tag.appendChild(closeButton);
+    return tag;
+  }
+
+  genInput(type) {
+    const input = document.createElement("input");
+    input.setAttribute("list", `${type}-filter`);
+    input.classList.add("w-96", "rounded");
+    input.placeholder = `Rechercher un ${this.translations[type]}`;
+    input.addEventListener("change", (event) => {
+      const value = event.target.value;
+      if (this.availableFilters[type].includes(value)) {
+        document.dispatchEvent(
+          new CustomEvent("filter-select", {
+            detail: {
+              filterType: type,
+              filterValue: value,
+            },
+          })
+        );
+        event.target.value = "";
+      }
+    });
+    return input;
+  }
+
+  genDataList(type) {
+    const dataList = document.createElement("datalist");
+    dataList.setAttribute("id", `${type}-filter`);
+
+    const options = this.availableFilters[type].map((ig) => {
       const option = document.createElement("option");
       option.setAttribute("value", ig);
       return option;
     });
-    dataList.append(...opts);
+    dataList.append(...options);
     return dataList;
+  }
+
+  genFilter(type) {
+    return [this.genInput(type), this.genDataList(type)];
   }
 
   getColor(type) {

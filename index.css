@@ -2,6 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
+
 input {
-    @apply border border-secondaryGreyDark focus:outline-none focus:ring-2 focus:ring-secondaryGreyDark focus:border-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondaryGreyDark focus-visible:border-transparent;
+    @apply border outline-none border-secondaryGreyDark focus: ring-2 focus:ring-secondaryGreyDark focus:border-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondaryGreyDark focus-visible:border-transparent;
 }

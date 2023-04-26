@@ -3,7 +3,6 @@ class Model {
     this.recipes = [...recipes];
 
     // add a search filter for title, description and ingredients
-    // map this.recipes to erase duplicates
 
     this.ingredients = [];
     this.appliances = [];
@@ -76,16 +75,16 @@ class Model {
   }
 
   setFilter(type, value) {
-    this.filters[type].push(value);
+    if (!this.filters[type].includes(value)) {
+      this.filters[type].push(value);
+    }
   }
 
   removeFilter(type, value) {
-    console.log(`removing ${value} from ${type}`);
-    // this.filters[type] = this.filters[type].filter((item) => item !== value);
+    this.filters[type] = this.filters[type].filter((item) => item !== value);
   }
 
   capitalise(phrase) {
-    console.log(phrase);
     return `${phrase.substring(0, 1).toUpperCase()}${phrase
       .substring(1)
       .toLowerCase()}`;
