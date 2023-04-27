@@ -2,14 +2,13 @@ class Model {
   constructor() {
     this.recipes = [...recipes];
 
-    // add a search filter for title, description and ingredients
+    this.globalSearch = "";
 
     this.ingredients = [];
     this.appliances = [];
     this.tools = [];
 
     this.filters = {
-      global: [],
       ingredients: [],
       appliances: [],
       tools: [],
@@ -42,7 +41,49 @@ class Model {
     };
   }
 
-  getFilteredRecipes() {
+  getRecipes() {
+    if (this.globalSearch === "") {
+      return this.applyFilters();
+    }
+
+    const filteredRecipes = this.applyFilters();
+
+    const newRecipes = filteredRecipes.filter((recipe) => {
+      const possibilities = [
+        this.slugify(recipe.name),
+        this.slugify(recipe.description),
+        ...recipe.ingredients.map((ingredient) =>
+          this.slugify(ingredient.ingredient)
+        ),
+      ];
+
+      return possibilities.some(
+        (possibility) => possibility.indexOf(this.globalSearch) !== -1
+      );
+    });
+
+    // let newRecipes = [];
+
+    // for (let recipe of filteredRecipes) {
+    //   const possibilities = [
+    //     this.slugify(recipe.name),
+    //     this.slugify(recipe.description),
+    //     ...recipe.ingredients.map((ingredient) =>
+    //       this.slugify(ingredient.ingredient)
+    //     ),
+    //   ];
+    //   for (let possibility of possibilities) {
+    //     if (possibility.indexOf(this.globalSearch) !== -1) {
+    //       newRecipes.push(recipe);
+    //       break;
+    //     }
+    //   }
+    // }
+
+    return newRecipes;
+  }
+
+  applyFilters() {
     return this.recipes.filter((recipe) => {
       const ingredients = recipe.ingredients.map(
         (ingredient) => ingredient.ingredient
@@ -50,28 +91,20 @@ class Model {
       const appliances = [recipe.appliance];
       const tools = recipe.ustensils;
 
-      const filters = [
-        ...this.filters.ingredients,
-        ...this.filters.appliances,
-        ...this.filters.tools,
-      ];
-
-      return filters.every((filter) => {
-        return (
-          ingredients.includes(filter) ||
-          appliances.includes(filter) ||
-          tools.includes(filter)
-        );
-      });
+      return (
+        this.filters.ingredients.every((ingredient) =>
+          ingredients.includes(ingredient)
+        ) &&
+        this.filters.tools.every((tool) => tools.includes(tool)) &&
+        this.filters.appliances.every((appliance) =>
+          appliances.includes(appliance)
+        )
+      );
     });
   }
 
-  getAvailableFilters() {
-    return this.availableFilters;
-  }
-
-  getFilters() {
-    return this.filters;
+  setGlobalSearch(_, value) {
+    this.globalSearch = this.slugify(value);
   }
 
   setFilter(type, value) {
@@ -84,9 +117,16 @@ class Model {
     this.filters[type] = this.filters[type].filter((item) => item !== value);
   }
 
-  capitalise(phrase) {
-    return `${phrase.substring(0, 1).toUpperCase()}${phrase
+  capitalise(str) {
+    return `${str.substring(0, 1).toUpperCase()}${str
       .substring(1)
       .toLowerCase()}`;
+  }
+
+  slugify(str) {
+    return str
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/\p{Diacritic}/gu, "");
   }
 }

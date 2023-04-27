@@ -2,15 +2,17 @@ class Controller {
   constructor() {
     this.model = new Model();
 
+    this.globalSearch = "";
     this.filters = [];
     this.availableFilters = [];
     this.recipes = [];
   }
 
   refreshData() {
-    this.filters = this.model.getFilters();
-    this.availableFilters = this.model.getAvailableFilters();
-    this.recipes = this.model.getFilteredRecipes();
+    this.globalSearch = this.model.globalSearch;
+    this.filters = this.model.filters;
+    this.availableFilters = this.model.availableFilters;
+    this.recipes = this.model.getRecipes();
   }
 
   filterHandler(action) {
@@ -32,6 +34,11 @@ class Controller {
     document.addEventListener(
       "filter-remove",
       this.filterHandler("removeFilter")
+    );
+
+    document.addEventListener(
+      "global-search",
+      this.filterHandler("setGlobalSearch")
     );
   }
 }

@@ -12,13 +12,7 @@ class Search {
 
   init(availableFilters) {
     this.availableFilters = availableFilters;
-    this.searchContainer.classList.add(
-      "flex",
-      "flex-col",
-      "gap-5",
-      "w-full",
-      "bg-primaryBlue"
-    );
+    this.searchContainer.classList.add("flex", "flex-col", "gap-5", "w-full");
 
     // #region search bar
     const searchBarContainer = document.createElement("div");
@@ -27,17 +21,27 @@ class Search {
     const searchInput = document.createElement("input");
     searchInput.classList.add("h-10", "px-4", "rounded", "w-full");
     searchInput.placeholder = "Rechercher une recette";
+    searchInput.addEventListener("input", (event) => {
+      let value = "";
+      if (event.target.value.length > 2) {
+        value = event.target.value;
+      }
+      document.dispatchEvent(
+        new CustomEvent("global-search", {
+          detail: {
+            filterType: "global-search",
+            filterValue: value,
+          },
+        })
+      );
+    });
+
     searchBarContainer.appendChild(searchInput);
     // #endregion
 
     // #region filter tags
     this.filterTagsWrapper = document.createElement("div");
-    this.filterTagsWrapper.classList.add(
-      "flex",
-      "gap-2",
-      "items-center",
-      "p-2"
-    );
+    this.filterTagsWrapper.classList.add("flex", "gap-2", "p-2");
     this.filterTagsWrapper.setAttribute("id", "tags-wrapper");
     // #endregion
 
@@ -76,7 +80,7 @@ class Search {
 
   genTag(type, filter) {
     const tag = document.createElement("div");
-    const color = `bg-${this.getColor(type)}`;
+    const bgColor = `bg-${this.getColor(type)}`;
     tag.classList.add(
       "flex",
       "items-center",
@@ -85,7 +89,7 @@ class Search {
       "py-2",
       "rounded",
       "text-white",
-      color
+      bgColor
     );
     tag.textContent = filter;
 
