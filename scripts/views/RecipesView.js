@@ -4,7 +4,7 @@ class RecipesView {
     this.recipesContainer.classList.add(
       "flex",
       "flex-wrap",
-      "justify-center",
+      "justify-between",
       "gap-10",
       "p-10"
     );

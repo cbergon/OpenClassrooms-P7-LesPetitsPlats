@@ -21,7 +21,7 @@ class Model {
             (acc, recipe) => [
               ...acc,
               ...recipe.ingredients.map((ingredient) =>
-                this.capitalise(ingredient.ingredient)
+                capitalise(ingredient.ingredient)
               ),
             ],
             []
@@ -29,13 +29,11 @@ class Model {
         )
       ).sort(),
       appliances: Array.from(
-        new Set(this.recipes.map((recipe) => this.capitalise(recipe.appliance)))
+        new Set(this.recipes.map((recipe) => capitalise(recipe.appliance)))
       ).sort(),
       tools: Array.from(
         new Set(
-          this.recipes.flatMap((recipe) =>
-            recipe.ustensils.map(this.capitalise)
-          )
+          this.recipes.flatMap((recipe) => recipe.ustensils.map(capitalise))
         )
       ).sort(),
     };
@@ -50,10 +48,10 @@ class Model {
 
     const newRecipes = filteredRecipes.filter((recipe) => {
       const possibilities = [
-        this.slugify(recipe.name),
-        this.slugify(recipe.description),
+        slugify(recipe.name),
+        slugify(recipe.description),
         ...recipe.ingredients.map((ingredient) =>
-          this.slugify(ingredient.ingredient)
+          slugify(ingredient.ingredient)
         ),
       ];
 
@@ -66,10 +64,10 @@ class Model {
 
     // for (let recipe of filteredRecipes) {
     //   const possibilities = [
-    //     this.slugify(recipe.name),
-    //     this.slugify(recipe.description),
+    //     slugify(recipe.name),
+    //     slugify(recipe.description),
     //     ...recipe.ingredients.map((ingredient) =>
-    //       this.slugify(ingredient.ingredient)
+    //       slugify(ingredient.ingredient)
     //     ),
     //   ];
     //   for (let possibility of possibilities) {
@@ -104,7 +102,7 @@ class Model {
   }
 
   setGlobalSearch(_, value) {
-    this.globalSearch = this.slugify(value);
+    this.globalSearch = slugify(value);
   }
 
   setFilter(type, value) {
@@ -115,18 +113,5 @@ class Model {
 
   removeFilter(type, value) {
     this.filters[type] = this.filters[type].filter((item) => item !== value);
-  }
-
-  capitalise(str) {
-    return `${str.substring(0, 1).toUpperCase()}${str
-      .substring(1)
-      .toLowerCase()}`;
-  }
-
-  slugify(str) {
-    return str
-      .toLowerCase()
-      .normalize("NFD")
-      .replace(/\p{Diacritic}/gu, "");
   }
 }

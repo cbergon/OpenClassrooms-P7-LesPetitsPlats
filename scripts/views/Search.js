@@ -12,14 +12,30 @@ class Search {
 
   init(availableFilters) {
     this.availableFilters = availableFilters;
-    this.searchContainer.classList.add("flex", "flex-col", "gap-5", "w-full");
+    this.searchContainer.classList.add(
+      "flex",
+      "flex-col",
+      "gap-5",
+      "w-full",
+      "px-10"
+    );
 
     // #region search bar
     const searchBarContainer = document.createElement("div");
     searchBarContainer.classList.add("flex", "justify-center", "w-full");
 
     const searchInput = document.createElement("input");
-    searchInput.classList.add("h-10", "px-4", "rounded", "w-full");
+    searchInput.classList.add(
+      "h-10",
+      "p-6",
+      "rounded",
+      "w-full",
+      "bg-secondaryGrey",
+      "border-none",
+      "text-black",
+      "text-lg",
+      "text-opacity-25"
+    );
     searchInput.placeholder = "Rechercher une recette";
     searchInput.addEventListener("input", (event) => {
       let value = "";
@@ -41,7 +57,7 @@ class Search {
 
     // #region filter tags
     this.filterTagsWrapper = document.createElement("div");
-    this.filterTagsWrapper.classList.add("flex", "gap-2", "p-2");
+    this.filterTagsWrapper.classList.add("flex", "gap-2", "py-2");
     this.filterTagsWrapper.setAttribute("id", "tags-wrapper");
     // #endregion
 
@@ -78,9 +94,10 @@ class Search {
     // #endregion
   }
 
+  // generates tag displaying active filters
   genTag(type, filter) {
     const tag = document.createElement("div");
-    const bgColor = `bg-${this.getColor(type)}`;
+    const bgColor = this.getColor(type);
     tag.classList.add(
       "flex",
       "items-center",
@@ -109,10 +126,49 @@ class Search {
     return tag;
   }
 
+  // generates a button that activate the filter's input
+  genButton(type) {
+    const button = document.createElement("button");
+    button.setAttribute("id", `filter-${type}`);
+    button.classList.add(
+      "text-white",
+      "p-6",
+      "rounded",
+      "w-44",
+      "flex",
+      "justify-between",
+      "items-center",
+      this.getColor(type)
+    );
+    button.textContent = capitalise(this.translations[type]);
+
+    const icon = document.createElement("img");
+    icon.classList.add("w-4");
+    icon.setAttribute("src", "assets/down-arrow-svgrepo-com.svg");
+    icon.setAttribute("type", "image/svg");
+    icon.setAttribute("alt", "dropdown-arrow");
+
+    button.appendChild(icon);
+
+    return button;
+  }
+
+  // generates an input activated by a button and displaying a datalist
   genInput(type) {
+    const width = type === "ingredients" ? "w-[1000px]" : "w-96";
     const input = document.createElement("input");
-    input.setAttribute("list", `${type}-filter`);
-    input.classList.add("w-96", "rounded");
+    input.setAttribute("list", "");
+    input.setAttribute("autocomplete", "off");
+    input.classList.add(
+      width,
+      "rounded-t",
+      "placeholder-white",
+      "text-bold",
+      "text-white",
+      "p-6",
+      "focus-visible:outline-none",
+      this.getColor(type)
+    );
     input.placeholder = `Rechercher un ${this.translations[type]}`;
     input.addEventListener("change", (event) => {
       const value = event.target.value;
@@ -128,36 +184,113 @@ class Search {
         event.target.value = "";
       }
     });
-    return input;
+
+    const icon = document.createElement("img");
+    icon.classList.add(
+      "w-4",
+      "absolute",
+      "z-10",
+      "right-6",
+      "top-6",
+      "cursor-pointer"
+    );
+    icon.setAttribute("id", `close-${type}`);
+    icon.setAttribute("src", "assets/up-arrow-svgrepo-com.svg");
+    icon.setAttribute("type", "image/svg");
+    icon.setAttribute("alt", "dropdown-arrow");
+    icon.classList.add("absolute");
+    icon.addEventListener("click", () => {
+      this.toggleFilter(true, type);
+    });
+
+    const wrapper = document.createElement("div");
+    wrapper.setAttribute("id", `input-${type}`);
+    wrapper.classList.add("hidden", "relative");
+    wrapper.appendChild(input);
+    wrapper.appendChild(icon);
+    return wrapper;
   }
 
+  // generates a datalist with the different options from each filter list
   genDataList(type) {
+    const width = type === "ingredients" ? "w-[1000px]" : "w-96";
+    const color = this.getColor(type);
+
     const dataList = document.createElement("datalist");
-    dataList.setAttribute("id", `${type}-filter`);
+    dataList.setAttribute("id", `datalist-${type}`);
+    dataList.classList.add(
+      "hidden",
+      "flex",
+      "flex-col",
+      "flex-wrap",
+      "absolute",
+      width,
+      "max-h-[1050px]",
+      "gap-y-2",
+      "gap-x-4",
+      "px-8",
+      "pb-8",
+      "top-18",
+      "left-0",
+      "rounded-b",
+      color
+    );
 
     const options = this.availableFilters[type].map((ig) => {
       const option = document.createElement("option");
+      option.classList.add(color, "text-white", "min-w-40");
       option.setAttribute("value", ig);
+      option.textContent = ig;
       return option;
     });
     dataList.append(...options);
     return dataList;
   }
 
-  genFilter(type) {
-    return [this.genInput(type), this.genDataList(type)];
+  // opens dropdown to filter dataLists
+  toggleFilter(isFilterOpened, type) {
+    const button = document.querySelector(`#filter-${type}`);
+    const input = document.querySelector(`#input-${type}`);
+    const dataList = document.querySelector(`#datalist-${type}`);
+    if (isFilterOpened) {
+      button.style.display = "flex";
+      input.style.display = "none";
+      dataList.style.display = "none";
+    } else {
+      button.style.display = "none";
+      input.style.display = "block";
+      dataList.style.display = "flex";
+    }
   }
 
+  // put together the 3 different elements composing the filter feature
+  genFilter(type) {
+    const button = this.genButton(type);
+    const input = this.genInput(type);
+    const dataList = this.genDataList(type);
+
+    button.addEventListener("click", () => {
+      this.toggleFilter(false, type);
+    });
+
+    const inputWrapper = document.createElement("div");
+    inputWrapper.classList.add("relative", "w-max");
+    inputWrapper.append(input, dataList);
+
+    return [button, inputWrapper];
+  }
+
+  // returns a background colour according the filter type
   getColor(type) {
     switch (type) {
       case "ingredients":
-        return "secondaryBlue";
+        return "bg-secondaryBlue";
       case "appliances":
-        return "secondaryGreen";
+        return "bg-secondaryGreen";
       case "tools":
-        return "secondaryOrange";
+        return "bg-secondaryOrange";
       default:
-        return "secondaryGrey";
+        return "bg-secondaryGrey";
     }
   }
 }
