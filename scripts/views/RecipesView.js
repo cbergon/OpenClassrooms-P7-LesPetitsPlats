@@ -13,16 +13,16 @@ class RecipesView {
   init(availableFilters, filters) {
     this.search = new Search();
     this.search.init(availableFilters, filters);
-    this.search.render(filters);
+    this.search.render(availableFilters, filters);
   }
 
-  render(recipes, filters) {
+  render(recipes, availableFilters, filters) {
     this.recipesContainer.innerHTML = "";
     recipes.forEach((recipe) => {
       const recipeCard = new RecipeCard(recipe);
       this.recipesContainer.appendChild(recipeCard.render());
     });
 
-    this.search.render(filters);
+    this.search.render(availableFilters, filters);
   }
 }

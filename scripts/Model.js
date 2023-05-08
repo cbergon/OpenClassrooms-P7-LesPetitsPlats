@@ -1,27 +1,23 @@
 class Model {
   constructor() {
     this.recipes = [...recipes];
+    this.filteredRecipes = this.recipes;
 
     this.globalSearch = "";
 
-    this.ingredients = [];
-    this.appliances = [];
-    this.tools = [];
-
-    this.filters = {
+    this.appliedFilters = {
       ingredients: [],
       appliances: [],
       tools: [],
     };
-
-    this.availableFilters = {
+    this.fullFilters = {
       ingredients: Array.from(
         new Set(
           this.recipes.reduce(
             (acc, recipe) => [
               ...acc,
               ...recipe.ingredients.map((ingredient) =>
-                capitalise(ingredient.ingredient)
+                Utils.capitalise(ingredient.ingredient)
               ),
             ],
             []
@@ -29,54 +25,125 @@ class Model {
         )
       ).sort(),
       appliances: Array.from(
-        new Set(this.recipes.map((recipe) => capitalise(recipe.appliance)))
+        new Set(
+          this.recipes.map((recipe) => Utils.capitalise(recipe.appliance))
+        )
       ).sort(),
       tools: Array.from(
         new Set(
-          this.recipes.flatMap((recipe) => recipe.ustensils.map(capitalise))
+          this.recipes.flatMap((recipe) =>
+            recipe.ustensils.map(Utils.capitalise)
+          )
         )
       ).sort(),
     };
+    this.availableFilters = this.fullFilters;
+    this.suggestedFilters = {
+      ingredients: "",
+      appliances: "",
+      tools: "",
+    };
+  }
+
+  getAvailableFilters() {
+    this.availableFilters = {
+      ingredients: Array.from(
+        new Set(
+          this.filteredRecipes.reduce(
+            (acc, recipe) => [
+              ...acc,
+              ...recipe.ingredients.map((ingredient) =>
+                Utils.capitalise(ingredient.ingredient)
+              ),
+            ],
+            []
+          )
+        )
+      )
+        .sort()
+        .filter(
+          (ingredient) =>
+            this.suggestedFilters.ingredients === "" ||
+            ingredient.toLowerCase().includes(this.suggestedFilters.ingredients)
+        ),
+      appliances: Array.from(
+        new Set(
+          this.filteredRecipes.map((recipe) =>
+            Utils.capitalise(recipe.appliance)
+          )
+        )
+      )
+        .sort()
+        .filter(
+          (appliance) =>
+            this.suggestedFilters.appliances === "" ||
+            appliance.toLowerCase().includes(this.suggestedFilters.appliances)
+        ),
+      tools: Array.from(
+        new Set(
+          this.filteredRecipes.flatMap((recipe) =>
+            recipe.ustensils.map(Utils.capitalise)
+          )
+        )
+      )
+        .sort()
+        .filter(
+          (tool) =>
+            this.suggestedFilters.tools === "" ||
+            tool.toLowerCase().includes(this.suggestedFilters.tools)
+        ),
+    };
+
+    // console.log("filteredRecipes", this.filteredRecipes);
+    // console.log("availableFilters", this.availableFilters);
+
+    return this.availableFilters;
   }
 
   getRecipes() {
-    if (this.globalSearch === "") {
-      return this.applyFilters();
+    this.filteredRecipes = this.applyFilters();
+    if (this.globalSearch.length > 2) {
+      this.filteredRecipes = this.applySearch(
+        this.filteredRecipes,
+        this.globalSearch
+      );
     }
 
-    const filteredRecipes = this.applyFilters();
+    return this.filteredRecipes;
+  }
 
-    const newRecipes = filteredRecipes.filter((recipe) => {
+  applySearch(recipes, globalSearch) {
+    let newRecipes = [];
+
+    for (let recipe of recipes) {
       const possibilities = [
-        slugify(recipe.name),
-        slugify(recipe.description),
+        Utils.slugify(recipe.name),
+        Utils.slugify(recipe.description),
         ...recipe.ingredients.map((ingredient) =>
-          slugify(ingredient.ingredient)
+          Utils.slugify(ingredient.ingredient)
         ),
       ];
+      for (let possibility of possibilities) {
+        if (possibility.indexOf(globalSearch) !== -1) {
+          newRecipes.push(recipe);
+          break;
+        }
+      }
+    }
 
-      return possibilities.some(
-        (possibility) => possibility.indexOf(this.globalSearch) !== -1
-      );
-    });
-
-    // let newRecipes = [];
-
-    // for (let recipe of filteredRecipes) {
+    // const newRecipes = recipes.filter((recipe) => {
     //   const possibilities = [
-    //     slugify(recipe.name),
-    //     slugify(recipe.description),
+    //     Utils.slugify(recipe.name),
+    //     Utils.slugify(recipe.description),
     //     ...recipe.ingredients.map((ingredient) =>
-    //       slugify(ingredient.ingredient)
+    //       Utils.slugify(ingredient.ingredient)
     //     ),
     //   ];
-    //   for (let possibility of possibilities) {
-    //     if (possibility.indexOf(this.globalSearch) !== -1) {
-    //       newRecipes.push(recipe);
-    //       break;
-    //     }
-    //   }
-    // }
+
+    //   return possibilities.some(
+    //     (possibility) => possibility.indexOf(globalSearch) !== -1
+    //   );
+    // });
 
     return newRecipes;
   }
@@ -90,28 +157,35 @@ class Model {
       const tools = recipe.ustensils;
 
       return (
-        this.filters.ingredients.every((ingredient) =>
+        this.appliedFilters.ingredients.every((ingredient) =>
           ingredients.includes(ingredient)
         ) &&
-        this.filters.tools.every((tool) => tools.includes(tool)) &&
-        this.filters.appliances.every((appliance) =>
+        this.appliedFilters.tools.every((tool) => tools.includes(tool)) &&
+        this.appliedFilters.appliances.every((appliance) =>
           appliances.includes(appliance)
         )
       );
     });
   }
 
+  suggestFilters(type, value) {
+    this.suggestedFilters[type] = value.toLowerCase();
+  }
+
   setGlobalSearch(_, value) {
-    this.globalSearch = slugify(value);
+    this.globalSearch = Utils.slugify(value);
   }
 
   setFilter(type, value) {
-    if (!this.filters[type].includes(value)) {
-      this.filters[type].push(value);
+    if (!this.appliedFilters[type].includes(value)) {
+      this.appliedFilters[type].push(value);
+      this.suggestedFilters[type] = "";
     }
   }
 
   removeFilter(type, value) {
-    this.filters[type] = this.filters[type].filter((item) => item !== value);
+    this.appliedFilters[type] = this.appliedFilters[type].filter(
+      (item) => item !== value
+    );
   }
 }

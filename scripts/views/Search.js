@@ -21,11 +21,65 @@ class Search {
     );
 
     // #region search bar
-    const searchBarContainer = document.createElement("div");
-    searchBarContainer.classList.add("flex", "justify-center", "w-full");
+    const globalSearchBar = this.genGlobalSearchInput();
+    // #endregion
 
-    const searchInput = document.createElement("input");
-    searchInput.classList.add(
+    // #region active filters tags wrapper
+    this.filterTagsWrapper = document.createElement("div");
+    this.filterTagsWrapper.classList.add("flex", "gap-2", "py-2");
+    this.filterTagsWrapper.setAttribute("id", "tags-wrapper");
+    // #endregion
+
+    // #region filters wrapper
+    this.filterInputsWrapper = document.createElement("div");
+    this.filterInputsWrapper.classList.add("flex", "gap-2", "items-center");
+    this.filterTagsWrapper.setAttribute("id", "filters-wrapper");
+
+    const ingredientsFilter = this.genFilter("ingredients");
+    const appliancesFilter = this.genFilter("appliances");
+    const toolsFilter = this.genFilter("tools");
+
+    this.filterInputsWrapper.append(
+      ...ingredientsFilter,
+      ...appliancesFilter,
+      ...toolsFilter
+    );
+    // #endregion
+
+    this.searchContainer.appendChild(globalSearchBar);
+    this.searchContainer.appendChild(this.filterTagsWrapper);
+    this.searchContainer.appendChild(this.filterInputsWrapper);
+  }
+
+  render(availableFilters, filters) {
+    // #region updating available filters
+    this.availableFilters = availableFilters;
+    // #endregion
+
+    // #region rendering active filter tags
+    const filterTags = Object.keys(filters).reduce((acc, filterType) => {
+      const tags = filters[filterType].map((filter) =>
+        this.genFilterTag(filterType, filter)
+      );
+      return [...acc, ...tags];
+    }, []);
+    this.filterTagsWrapper.innerHTML = "";
+    this.filterTagsWrapper.append(...filterTags);
+    // #endregion
+
+    // #region updating filters datalist options
+    this.updateDataList("ingredients");
+    this.updateDataList("appliances");
+    this.updateDataList("tools");
+    // #endregion
+  }
+
+  // generates global search input
+  genGlobalSearchInput() {
+    const searchBarWrapper = document.createElement("div");
+    searchBarWrapper.classList.add("flex", "justify-center", "w-full");
+    const globalSearchInput = document.createElement("input");
+    globalSearchInput.classList.add(
       "h-10",
       "p-6",
       "rounded",
@@ -36,8 +90,8 @@ class Search {
       "text-lg",
       "text-opacity-25"
     );
-    searchInput.placeholder = "Rechercher une recette";
-    searchInput.addEventListener("input", (event) => {
+    globalSearchInput.placeholder = "Rechercher une recette";
+    globalSearchInput.addEventListener("input", (event) => {
       let value = "";
       if (event.target.value.length > 2) {
         value = event.target.value;
@@ -52,50 +106,13 @@ class Search {
       );
     });
 
-    searchBarContainer.appendChild(searchInput);
-    // #endregion
+    searchBarWrapper.appendChild(globalSearchInput);
 
-    // #region filter tags
-    this.filterTagsWrapper = document.createElement("div");
-    this.filterTagsWrapper.classList.add("flex", "gap-2", "py-2");
-    this.filterTagsWrapper.setAttribute("id", "tags-wrapper");
-    // #endregion
-
-    // #region filters inputs
-    const filterInputsWrapper = document.createElement("div");
-    filterInputsWrapper.classList.add("flex", "gap-2", "items-center");
-
-    const ingredientsFilter = this.genFilter("ingredients");
-    const appliancesFilter = this.genFilter("appliances");
-    const toolsFilter = this.genFilter("tools");
-
-    filterInputsWrapper.append(
-      ...ingredientsFilter,
-      ...appliancesFilter,
-      ...toolsFilter
-    );
-    // #endregion
-
-    this.searchContainer.appendChild(searchBarContainer);
-    this.searchContainer.appendChild(this.filterTagsWrapper);
-    this.searchContainer.appendChild(filterInputsWrapper);
-  }
-
-  render(filters) {
-    // #region filters tags
-    const filterTags = Object.keys(filters).reduce((acc, filterType) => {
-      const tags = filters[filterType].map((filter) =>
-        this.genTag(filterType, filter)
-      );
-      return [...acc, ...tags];
-    }, []);
-    this.filterTagsWrapper.innerHTML = "";
-    this.filterTagsWrapper.append(...filterTags);
-    // #endregion
+    return searchBarWrapper;
   }
 
   // generates tag displaying active filters
-  genTag(type, filter) {
+  genFilterTag(type, filter) {
     const tag = document.createElement("div");
     const bgColor = this.getColor(type);
     tag.classList.add(
@@ -127,7 +144,7 @@ class Search {
   }
 
   // generates a button that activate the filter's input
-  genButton(type) {
+  genFilterButton(type) {
     const button = document.createElement("button");
     button.setAttribute("id", `filter-${type}`);
     button.classList.add(
@@ -140,7 +157,7 @@ class Search {
       "items-center",
       this.getColor(type)
     );
-    button.textContent = capitalise(this.translations[type]);
+    button.textContent = Utils.capitalise(this.translations[type]);
 
     const icon = document.createElement("img");
     icon.classList.add("w-4");
@@ -154,7 +171,7 @@ class Search {
   }
 
   // generates an input activated by a button and displaying a datalist
-  genInput(type) {
+  genFilterInput(type) {
     const width = type === "ingredients" ? "w-[1000px]" : "w-96";
     const input = document.createElement("input");
     input.setAttribute("list", "");
@@ -170,6 +187,19 @@ class Search {
       this.getColor(type)
     );
     input.placeholder = `Rechercher un ${this.translations[type]}`;
+    // dispatches a custom event to trigger autocomplete
+    input.addEventListener("input", (event) => {
+      const value = event.target.value;
+      document.dispatchEvent(
+        new CustomEvent("filter-suggest", {
+          detail: {
+            filterType: type,
+            filterValue: value,
+          },
+        })
+      );
+    });
+    // dispatches a custom event to apply chosen filter
     input.addEventListener("change", (event) => {
       const value = event.target.value;
       if (this.availableFilters[type].includes(value)) {
@@ -211,10 +241,34 @@ class Search {
     return wrapper;
   }
 
+  // generates filter options
+  genFilterOptions(type, ft) {
+    const option = document.createElement("option");
+    option.classList.add(
+      this.getColor(type),
+      "text-white",
+      "min-w-40",
+      "cursor-pointer"
+    );
+    option.setAttribute("value", ft);
+    option.textContent = ft;
+    // dispatches a custom event to apply chosen filter
+    option.addEventListener("click", () => {
+      document.dispatchEvent(
+        new CustomEvent("filter-select", {
+          detail: {
+            filterType: type,
+            filterValue: ft,
+          },
+        })
+      );
+    });
+    return option;
+  }
+
   // generates a datalist with the different options from each filter list
-  genDataList(type) {
+  genFilterDataList(type) {
     const width = type === "ingredients" ? "w-[1000px]" : "w-96";
-    const color = this.getColor(type);
 
     const dataList = document.createElement("datalist");
     dataList.setAttribute("id", `datalist-${type}`);
@@ -233,16 +287,12 @@ class Search {
       "top-18",
       "left-0",
       "rounded-b",
-      color
+      this.getColor(type)
     );
 
-    const options = this.availableFilters[type].map((ig) => {
-      const option = document.createElement("option");
-      option.classList.add(color, "text-white", "min-w-40");
-      option.setAttribute("value", ig);
-      option.textContent = ig;
-      return option;
-    });
+    const options = this.availableFilters[type].map((ft) =>
+      this.genFilterOptions(type, ft)
+    );
     dataList.append(...options);
     return dataList;
   }
@@ -265,9 +315,9 @@ class Search {
 
   // put together the 3 different elements composing the filter feature
   genFilter(type) {
-    const button = this.genButton(type);
-    const input = this.genInput(type);
-    const dataList = this.genDataList(type);
+    const button = this.genFilterButton(type);
+    const input = this.genFilterInput(type);
+    const dataList = this.genFilterDataList(type);
 
     button.addEventListener("click", () => {
       this.toggleFilter(false, type);
@@ -278,6 +328,16 @@ class Search {
     inputWrapper.append(input, dataList);
 
     return [button, inputWrapper];
+  }
+
+  // updates the filter's datalist
+  updateDataList(type) {
+    const dataList = document.querySelector(`#datalist-${type}`);
+    dataList.innerHTML = "";
+    const options = this.availableFilters[type].map((ft) =>
+      this.genFilterOptions(type, ft)
+    );
+    dataList.append(...options);
   }
 
   // returns a background colour according the filter type
