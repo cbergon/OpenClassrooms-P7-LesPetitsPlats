@@ -120,24 +120,14 @@ class Model {
   }
 
   applySearch(recipes, globalSearch) {
-    let newRecipes = [];
-
-    for (let recipe of recipes) {
-      console.log(recipe);
-      const possibilities = [
-        recipe.name,
-        recipe.description,
-        ...recipe.ingredients.map((ingredient) => ingredient.ingredient),
-      ];
-      for (let possibility of possibilities) {
-        if (possibility.includes(globalSearch)) {
-          newRecipes.push(recipe);
-          break;
-        }
-      }
-    }
-
-    return newRecipes;
+    return recipes.filter(
+      (recipe) =>
+        recipe.name.includes(globalSearch) ||
+        recipe.description.includes(globalSearch) ||
+        recipe.ingredients.some(({ ingredient }) =>
+          ingredient.includes(globalSearch)
+        )
+    );
   }
 
   applyFilters() {
