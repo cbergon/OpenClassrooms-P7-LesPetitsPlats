@@ -159,7 +159,7 @@ class Model {
   }
 
   setFilter(type, value) {
-    if (!this.appliedFilters[type].includes(Utils.capitalize(value))) {
+    if (!this.appliedFilters[type].includes(value)) {
       this.appliedFilters[type].push(value);
       this.suggestedFilters[type] = "";
     }

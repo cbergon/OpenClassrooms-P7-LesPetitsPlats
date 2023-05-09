@@ -203,6 +203,7 @@ class Search {
     input.addEventListener("change", (event) => {
       const value = Utils.normalize(event.target.value);
       if (this.availableFilters[type].includes(value)) {
+        this.toggleFilter(true, type);
         document.dispatchEvent(
           new CustomEvent("filter-select", {
             detail: {
@@ -257,6 +258,7 @@ class Search {
       // Clear the input value if we selected an option in the datalist
       const input = document.querySelector(`#input-${type} input`);
       input.value = "";
+      this.toggleFilter(true, type);
 
       // value is retrieved from context
       const value = ft;
@@ -316,6 +318,7 @@ class Search {
       button.style.display = "none";
       input.style.display = "block";
       dataList.style.display = "flex";
+      document.querySelector(`#input-${type} input`).focus();
     }
   }
 
