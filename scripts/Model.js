@@ -151,11 +151,11 @@ class Model {
   }
 
   suggestFilters(type, value) {
-    this.suggestedFilters[type] = Utils.normalize(value);
+    this.suggestedFilters[type] = value;
   }
 
   setGlobalSearch(_, value) {
-    this.globalSearch = Utils.normalize(value);
+    this.globalSearch = value;
   }
 
   setFilter(type, value) {

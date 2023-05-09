@@ -253,8 +253,13 @@ class Search {
     option.setAttribute("value", ft);
     option.textContent = Utils.capitalize(Model.prettyMap.get(ft));
     // dispatches a custom event to apply chosen filter
-    option.addEventListener("click", () => {
-      const value = Utils.normalize(ft);
+    option.addEventListener("click", (e) => {
+      // Clear the input value if we selected an option in the datalist
+      const input = document.querySelector(`#input-${type} input`);
+      input.value = "";
+
+      // value is retrieved from context
+      const value = ft;
       document.dispatchEvent(
         new CustomEvent("filter-select", {
           detail: {
