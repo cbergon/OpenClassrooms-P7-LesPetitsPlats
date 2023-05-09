@@ -94,7 +94,7 @@ class Search {
     globalSearchInput.addEventListener("input", (event) => {
       let value = "";
       if (event.target.value.length > 2) {
-        value = event.target.value;
+        value = Utils.normalize(event.target.value);
       }
       document.dispatchEvent(
         new CustomEvent("global-search", {
@@ -125,7 +125,7 @@ class Search {
       "text-white",
       bgColor
     );
-    tag.textContent = filter;
+    tag.textContent = Utils.capitalize(filter);
 
     const closeButton = document.createElement("button");
     closeButton.onclick = () =>
@@ -157,7 +157,7 @@ class Search {
       "items-center",
       this.getColor(type)
     );
-    button.textContent = Utils.capitalise(this.translations[type]);
+    button.textContent = Utils.capitalize(this.translations[type]);
 
     const icon = document.createElement("img");
     icon.classList.add("w-4");
@@ -189,7 +189,7 @@ class Search {
     input.placeholder = `Rechercher un ${this.translations[type]}`;
     // dispatches a custom event to trigger autocomplete
     input.addEventListener("input", (event) => {
-      const value = event.target.value;
+      const value = Utils.normalize(event.target.value);
       document.dispatchEvent(
         new CustomEvent("filter-suggest", {
           detail: {
@@ -201,8 +201,12 @@ class Search {
     });
     // dispatches a custom event to apply chosen filter
     input.addEventListener("change", (event) => {
-      const value = event.target.value;
-      if (this.availableFilters[type].includes(value)) {
+      const value = Utils.normalize(event.target.value);
+      if (
+        this.availableFilters[type]
+          .map((iter) => Utils.normalize(iter))
+          .includes(value)
+      ) {
         document.dispatchEvent(
           new CustomEvent("filter-select", {
             detail: {
@@ -258,7 +262,7 @@ class Search {
         new CustomEvent("filter-select", {
           detail: {
             filterType: type,
-            filterValue: ft,
+            filterValue: Utils.normalize(ft),
           },
         })
       );

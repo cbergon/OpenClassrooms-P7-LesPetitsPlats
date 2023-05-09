@@ -17,7 +17,7 @@ class Model {
             (acc, recipe) => [
               ...acc,
               ...recipe.ingredients.map((ingredient) =>
-                Utils.capitalise(ingredient.ingredient)
+                Utils.capitalize(ingredient.ingredient)
               ),
             ],
             []
@@ -26,13 +26,13 @@ class Model {
       ).sort(),
       appliances: Array.from(
         new Set(
-          this.recipes.map((recipe) => Utils.capitalise(recipe.appliance))
+          this.recipes.map((recipe) => Utils.capitalize(recipe.appliance))
         )
       ).sort(),
       tools: Array.from(
         new Set(
           this.recipes.flatMap((recipe) =>
-            recipe.ustensils.map(Utils.capitalise)
+            recipe.ustensils.map(Utils.capitalize)
           )
         )
       ).sort(),
@@ -53,7 +53,7 @@ class Model {
             (acc, recipe) => [
               ...acc,
               ...recipe.ingredients.map((ingredient) =>
-                Utils.capitalise(ingredient.ingredient)
+                Utils.capitalize(ingredient.ingredient)
               ),
             ],
             []
@@ -64,12 +64,14 @@ class Model {
         .filter(
           (ingredient) =>
             this.suggestedFilters.ingredients === "" ||
-            ingredient.toLowerCase().includes(this.suggestedFilters.ingredients)
+            Utils.normalize(ingredient).includes(
+              this.suggestedFilters.ingredients
+            )
         ),
       appliances: Array.from(
         new Set(
           this.filteredRecipes.map((recipe) =>
-            Utils.capitalise(recipe.appliance)
+            Utils.capitalize(recipe.appliance)
           )
         )
       )
@@ -77,12 +79,14 @@ class Model {
         .filter(
           (appliance) =>
             this.suggestedFilters.appliances === "" ||
-            appliance.toLowerCase().includes(this.suggestedFilters.appliances)
+            Utils.normalize(appliance).includes(
+              this.suggestedFilters.appliances
+            )
         ),
       tools: Array.from(
         new Set(
           this.filteredRecipes.flatMap((recipe) =>
-            recipe.ustensils.map(Utils.capitalise)
+            recipe.ustensils.map(Utils.capitalize)
           )
         )
       )
@@ -90,7 +94,7 @@ class Model {
         .filter(
           (tool) =>
             this.suggestedFilters.tools === "" ||
-            tool.toLowerCase().includes(this.suggestedFilters.tools)
+            Utils.normalize(tool).includes(this.suggestedFilters.tools)
         ),
     };
 
@@ -117,10 +121,10 @@ class Model {
 
     for (let recipe of recipes) {
       const possibilities = [
-        Utils.slugify(recipe.name),
-        Utils.slugify(recipe.description),
+        Utils.normalize(recipe.name),
+        Utils.normalize(recipe.description),
         ...recipe.ingredients.map((ingredient) =>
-          Utils.slugify(ingredient.ingredient)
+          Utils.normalize(ingredient.ingredient)
         ),
       ];
       for (let possibility of possibilities) {
@@ -133,10 +137,10 @@ class Model {
 
     // const newRecipes = recipes.filter((recipe) => {
     //   const possibilities = [
-    //     Utils.slugify(recipe.name),
-    //     Utils.slugify(recipe.description),
+    //     Utils.normalize(recipe.name),
+    //     Utils.normalize(recipe.description),
     //     ...recipe.ingredients.map((ingredient) =>
-    //       Utils.slugify(ingredient.ingredient)
+    //       Utils.normalize(ingredient.ingredient)
     //     ),
     //   ];
 
@@ -173,11 +177,11 @@ class Model {
   }
 
   setGlobalSearch(_, value) {
-    this.globalSearch = Utils.slugify(value);
+    this.globalSearch = Utils.normalize(value);
   }
 
   setFilter(type, value) {
-    if (!this.appliedFilters[type].includes(value)) {
+    if (!this.appliedFilters[type].includes(Utils.capitalize(value))) {
       this.appliedFilters[type].push(value);
       this.suggestedFilters[type] = "";
     }

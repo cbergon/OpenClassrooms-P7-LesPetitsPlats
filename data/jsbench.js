@@ -1,4 +1,4 @@
-const consultURL = "https://jsben.ch/pPP9D";
+const consultURL = "https://jsben.ch/HLbnU";
 
 const globalSearch = "coco";
 
@@ -381,13 +381,13 @@ const recipes = [
 ];
 
 class Utils {
-  static capitalise(str) {
+  static capitalize(str) {
     return `${str.substring(0, 1).toUpperCase()}${str
       .substring(1)
       .toLowerCase()}`;
   }
 
-  static slugify(str) {
+  static normalize(str) {
     return str
       .toLowerCase()
       .normalize("NFD")
@@ -400,10 +400,10 @@ function applyForSearch(recipes, globalSearch) {
 
   for (let recipe of recipes) {
     const possibilities = [
-      Utils.slugify(recipe.name),
-      Utils.slugify(recipe.description),
+      Utils.normalize(recipe.name),
+      Utils.normalize(recipe.description),
       ...recipe.ingredients.map((ingredient) =>
-        Utils.slugify(ingredient.ingredient)
+        Utils.normalize(ingredient.ingredient)
       ),
     ];
     for (let possibility of possibilities) {
@@ -422,10 +422,10 @@ applyForSearch(recipes, globalSearch);
 function applyFuncSearch(recipes, globalSearch) {
   const newRecipes = recipes.filter((recipe) => {
     const possibilities = [
-      Utils.slugify(recipe.name),
-      Utils.slugify(recipe.description),
+      Utils.normalize(recipe.name),
+      Utils.normalize(recipe.description),
       ...recipe.ingredients.map((ingredient) =>
-        Utils.slugify(ingredient.ingredient)
+        Utils.normalize(ingredient.ingredient)
       ),
     ];
 
