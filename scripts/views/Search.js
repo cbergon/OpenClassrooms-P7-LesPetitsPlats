@@ -125,7 +125,7 @@ class Search {
       "text-white",
       bgColor
     );
-    tag.textContent = Utils.capitalize(filter);
+    tag.textContent = Utils.capitalize(Model.prettyMap.get(filter));
 
     const closeButton = document.createElement("button");
     closeButton.onclick = () =>
@@ -202,11 +202,7 @@ class Search {
     // dispatches a custom event to apply chosen filter
     input.addEventListener("change", (event) => {
       const value = Utils.normalize(event.target.value);
-      if (
-        this.availableFilters[type]
-          .map((iter) => Utils.normalize(iter))
-          .includes(value)
-      ) {
+      if (this.availableFilters[type].includes(value)) {
         document.dispatchEvent(
           new CustomEvent("filter-select", {
             detail: {
@@ -255,14 +251,15 @@ class Search {
       "cursor-pointer"
     );
     option.setAttribute("value", ft);
-    option.textContent = ft;
+    option.textContent = Utils.capitalize(Model.prettyMap.get(ft));
     // dispatches a custom event to apply chosen filter
     option.addEventListener("click", () => {
+      const value = Utils.normalize(ft);
       document.dispatchEvent(
         new CustomEvent("filter-select", {
           detail: {
             filterType: type,
-            filterValue: Utils.normalize(ft),
+            filterValue: value,
           },
         })
       );

@@ -71,7 +71,7 @@ class RecipeCard {
   createTitle() {
     const recipeName = document.createElement("div");
     recipeName.classList.add("text-lg");
-    recipeName.textContent = this.recipe.name;
+    recipeName.textContent = Model.prettyMap.get(this.recipe.name);
 
     const recipeTime = document.createElement("div");
     recipeTime.classList.add("text-lg", "font-bold");
@@ -97,7 +97,9 @@ class RecipeCard {
 
     const recipeDescription = document.createElement("p");
     recipeDescription.classList.add("line-clamp-5", "w-1/2");
-    recipeDescription.textContent = this.recipe.description;
+    recipeDescription.textContent = Model.prettyMap.get(
+      this.recipe.description
+    );
 
     recipeContent.appendChild(recipeIngredients);
     recipeContent.appendChild(recipeDescription);
@@ -111,7 +113,7 @@ class RecipeCard {
 
     const ingredientName = document.createElement("span");
     ingredientName.classList.add("font-bold");
-    ingredientName.textContent = ingredient.ingredient;
+    ingredientName.textContent = Model.prettyMap.get(ingredient.ingredient);
     ingredientElement.appendChild(ingredientName);
 
     if (ingredient.quantity) {

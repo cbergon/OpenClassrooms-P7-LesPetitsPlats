@@ -1,6 +1,27 @@
 class Model {
+  static prettyMap = new Map();
+
+  static prettifyAndSave(str) {
+    const pretty = Utils.normalize(str);
+    Model.prettyMap.set(pretty, str);
+    return pretty;
+  }
+
   constructor() {
-    this.recipes = [...recipes];
+    this.recipes = recipes.map((recipe) => {
+      const prettyRecipe = {
+        ...recipe,
+        name: Model.prettifyAndSave(recipe.name),
+        description: Model.prettifyAndSave(recipe.description),
+        appliance: Model.prettifyAndSave(recipe.appliance),
+        ingredients: recipe.ingredients.map((ingredient) => ({
+          ...ingredient,
+          ingredient: Model.prettifyAndSave(ingredient.ingredient),
+        })),
+        ustensils: recipe.ustensils.map(Model.prettifyAndSave),
+      };
+      return prettyRecipe;
+    });
     this.filteredRecipes = this.recipes;
 
     this.globalSearch = "";
@@ -52,9 +73,7 @@ class Model {
           this.filteredRecipes.reduce(
             (acc, recipe) => [
               ...acc,
-              ...recipe.ingredients.map((ingredient) =>
-                Utils.capitalize(ingredient.ingredient)
-              ),
+              ...recipe.ingredients.map((ingredient) => ingredient.ingredient),
             ],
             []
           )
@@ -64,43 +83,27 @@ class Model {
         .filter(
           (ingredient) =>
             this.suggestedFilters.ingredients === "" ||
-            Utils.normalize(ingredient).includes(
-              this.suggestedFilters.ingredients
-            )
+            ingredient.includes(this.suggestedFilters.ingredients)
         ),
       appliances: Array.from(
-        new Set(
-          this.filteredRecipes.map((recipe) =>
-            Utils.capitalize(recipe.appliance)
-          )
-        )
+        new Set(this.filteredRecipes.map((recipe) => recipe.appliance))
       )
         .sort()
         .filter(
           (appliance) =>
             this.suggestedFilters.appliances === "" ||
-            Utils.normalize(appliance).includes(
-              this.suggestedFilters.appliances
-            )
+            appliance.includes(this.suggestedFilters.appliances)
         ),
       tools: Array.from(
-        new Set(
-          this.filteredRecipes.flatMap((recipe) =>
-            recipe.ustensils.map(Utils.capitalize)
-          )
-        )
+        new Set(this.filteredRecipes.flatMap((recipe) => recipe.ustensils))
       )
         .sort()
         .filter(
           (tool) =>
             this.suggestedFilters.tools === "" ||
-            Utils.normalize(tool).includes(this.suggestedFilters.tools)
+            tool.includes(this.suggestedFilters.tools)
         ),
     };
-
-    // console.log("filteredRecipes", this.filteredRecipes);
-    // console.log("availableFilters", this.availableFilters);
-
     return this.availableFilters;
   }
 
@@ -120,34 +123,19 @@ class Model {
     let newRecipes = [];
 
     for (let recipe of recipes) {
+      console.log(recipe);
       const possibilities = [
-        Utils.normalize(recipe.name),
-        Utils.normalize(recipe.description),
-        ...recipe.ingredients.map((ingredient) =>
-          Utils.normalize(ingredient.ingredient)
-        ),
+        recipe.name,
+        recipe.description,
+        ...recipe.ingredients.map((ingredient) => ingredient.ingredient),
       ];
       for (let possibility of possibilities) {
-        if (possibility.indexOf(globalSearch) !== -1) {
+        if (possibility.includes(globalSearch)) {
           newRecipes.push(recipe);
           break;
         }
       }
     }
-
-    // const newRecipes = recipes.filter((recipe) => {
-    //   const possibilities = [
-    //     Utils.normalize(recipe.name),
-    //     Utils.normalize(recipe.description),
-    //     ...recipe.ingredients.map((ingredient) =>
-    //       Utils.normalize(ingredient.ingredient)
-    //     ),
-    //   ];
-
-    //   return possibilities.some(
-    //     (possibility) => possibility.indexOf(globalSearch) !== -1
-    //   );
-    // });
 
     return newRecipes;
   }
@@ -173,7 +161,7 @@ class Model {
   }
 
   suggestFilters(type, value) {
-    this.suggestedFilters[type] = value.toLowerCase();
+    this.suggestedFilters[type] = Utils.normalize(value);
   }
 
   setGlobalSearch(_, value) {
