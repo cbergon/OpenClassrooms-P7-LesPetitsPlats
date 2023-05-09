@@ -1,3 +1,4 @@
+// needs to be re-run each time, might take a while
 const benchmark = "https://jsperf.app/goqeve/2";
 
 const globalSearch = "coco";
