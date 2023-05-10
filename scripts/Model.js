@@ -120,14 +120,22 @@ class Model {
   }
 
   applySearch(recipes, globalSearch) {
-    return recipes.filter(
-      (recipe) =>
-        recipe.name.includes(globalSearch) ||
-        recipe.description.includes(globalSearch) ||
-        recipe.ingredients.some(({ ingredient }) =>
-          ingredient.includes(globalSearch)
-        )
-    );
+    let newRecipes = [];
+
+    for (let recipe of recipes) {
+      let contains = false;
+      contains |= recipe.name.includes(globalSearch);
+      contains |= recipe.description.includes(globalSearch);
+      for (let i = 0; !contains && i < recipe.ingredients.length; i++) {
+        const { ingredient } = recipe.ingredients[i];
+        contains |= ingredient.includes(globalSearch);
+      }
+      if (contains) {
+        newRecipes.push(recipe);
+      }
+    }
+
+    return newRecipes;
   }
 
   applyFilters() {
