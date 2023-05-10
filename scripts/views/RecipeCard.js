@@ -73,9 +73,24 @@ class RecipeCard {
     recipeName.classList.add("text-lg");
     recipeName.textContent = Model.prettyMap.get(this.recipe.name);
 
+    // #region duration
     const recipeTime = document.createElement("div");
-    recipeTime.classList.add("text-lg", "font-bold");
-    recipeTime.textContent = `${this.recipe.time} min`;
+    recipeTime.classList.add(
+      "text-lg",
+      "font-bold",
+      "flex",
+      "gap-2",
+      "items-center"
+    );
+
+    const clockIcon = document.createElement("i");
+    clockIcon.classList.add("fa-regular", "fa-clock");
+    recipeTime.appendChild(clockIcon);
+
+    const durationText = document.createElement("div");
+    durationText.textContent = `${this.recipe.time} min`;
+    recipeTime.appendChild(durationText);
+    // #endregion
 
     const recipeTitle = document.createElement("div");
     recipeTitle.classList.add("flex", "justify-between");

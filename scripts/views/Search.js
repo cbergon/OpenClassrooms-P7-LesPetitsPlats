@@ -88,7 +88,7 @@ class Search {
       "border-none",
       "text-black",
       "text-lg",
-      "text-opacity-25"
+      "placeholder:text-opacity-25"
     );
     globalSearchInput.placeholder = "Rechercher une recette";
     globalSearchInput.addEventListener("input", (event) => {
@@ -137,7 +137,9 @@ class Search {
           },
         })
       );
-    closeButton.textContent = "X";
+    const icon = document.createElement("i");
+    icon.classList.add("fa-sharp", "fa-regular", "fa-circle-xmark");
+    closeButton.appendChild(icon);
 
     tag.appendChild(closeButton);
     return tag;
